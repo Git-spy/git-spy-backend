@@ -4,7 +4,6 @@ import (
   "github.com/google/go-github/github"
   "github.com/ant0ine/go-json-rest/rest"
   "fmt"
-  "strings"
   "log"
   "net/http"
 )
@@ -15,7 +14,7 @@ func main() {
   api.Use(rest.DefaultDevStack...)
 
   router, err := rest.MakeRouter(
-    rest.Get("/stats/#id", GetStat),
+    rest.Get("/stats", GetStat),
   )
   if err != nil {
       log.Fatal(err)
@@ -25,11 +24,12 @@ func main() {
 }
 
 func GetStat(w rest.ResponseWriter, r *rest.Request) {
-  id := r.PathParam("id")
-  chunks := strings.Split(id, "-")
+  query := r.URL.Query()
+  user_id := query.Get("user_id")
+  repo_id := query.Get("repo_id")
   client := github.NewClient(nil)
-  orgs, _, _ := client.Repositories.Get(chunks[0], chunks[1])
+  orgs, _, _ := client.Repositories.Get(user_id, repo_id)
 
-  fmt.Println(orgs)
+  fmt.Println(user_id)
   w.WriteJson(orgs)
 }
